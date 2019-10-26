@@ -26,8 +26,8 @@ impl Git {
         self.error = Path::new("./.git").exists();
 
         if self.error {
-            println!(" {} Error.", self.red_arrow);
-            println!("✖ Git already exist in this directory");
+            print!(" {} Error.", self.red_arrow);
+            print!("\n✖ Git already exist in this directory");
         } else {
             print!(" {} Ok", self.green_arrow);
         }
@@ -45,8 +45,8 @@ impl Git {
             if command.output().is_ok() {
                 print!(" {} Ok", self.green_arrow);
             } else {
-                println!(" {} Error.", self.red_arrow);
-                println!("✖️ Failed to execute process: git init");
+                print!(" {} Error.", self.red_arrow);
+                print!("\n✖️ Failed to execute process: git init");
 
                 self.error = true;
             }
@@ -67,8 +67,8 @@ impl Git {
             if name_config.output().is_ok() {
                 print!(" {} Ok", self.green_arrow);
             } else {
-                println!(" {} Error.", self.red_arrow);
-                println!("✖️ Failed to execute process: git config user.name {}", name);
+                print!(" {} Error.", self.red_arrow);
+                print!("\n✖️ Failed to execute process: git config user.name {}", name);
 
                 self.error = true;
             }
@@ -89,11 +89,29 @@ impl Git {
             if email_config.output().is_ok() {
                 print!(" {} Ok", self.green_arrow);
             } else {
-                println!(" {} Error.", self.red_arrow);
-                println!("✖️ Failed to execute process: git config user.email {}", email);
+                print!(" {} Error.", self.red_arrow);
+                print!("\n✖️ Failed to execute process: git config user.email {}", email);
                 self.error = true;
             }
         }
+        self
+    }
+
+    fn print_help(&mut self) -> &Git {
+        println!("USAGE: ginit");
+        println!("USAGE: ginit [NAME] [EMAIL]");
+        println!();
+        println!("      --help     display this help and exit");
+        println!("      --version  output version information and exit");
+        println!();
+        println!("Examples:");
+
+        println!("  ginit Linus torwalds@email");
+        self
+    }
+
+    fn print_version(&mut self) -> &Git {
+        println!("version x.xx (YYYY-MM-DD) © 2019 Ramiz Abdullayev");
         self
     }
 
@@ -109,22 +127,36 @@ fn main() {
 
     let mut git = Git::new();
 
-    git.check();
-
     if args_size < 2 {
-        git.init();
-    }
+        git
+            .check()
+            .init();
+    } else if args_size == 2 {
+        let command = &args[1];
 
-    if args_size == 3 {
+        match command.as_ref() {
+            "--version" | "-v" => { git.print_version(); }
+            "--help" | "-h" => { git.print_help(); }
+
+            _ => {
+                println!("ginit: invalid command\n");
+                git.print_help();
+            }
+        }
+    } else if args_size == 3 {
         let name = &args[1];
         let email = &args[2];
 
         git
+            .check()
             .init()
             .config_name(name)
             .config_email(email);
+    } else {
+        println!("ginit: invalid command");
+        git.print_help();
     }
 
-    git.finish();
 
+    git.finish();
 }
