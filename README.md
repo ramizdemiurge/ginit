@@ -1,6 +1,3 @@
-# ginit
-Git tool
-
 ## Install
 You need cargo and rust compiler
 ```shell
